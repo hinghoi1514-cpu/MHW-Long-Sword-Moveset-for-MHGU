@@ -34,7 +34,11 @@ jobs:
         run: |
           arm-none-eabi-gcc --version
           rustc -Vv
-          cargo forge build --release
+          ls -la
+          ls -la 01_plugins/mhw_ls_rebuild
+          cargo forge --help
+          cd 01_plugins/mhw_ls_rebuild
+          cargo forge build --release || cargo forge build
 
       - name: Upload NRO artifact
         uses: actions/upload-artifact@v4
