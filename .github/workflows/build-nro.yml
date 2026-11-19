@@ -1,0 +1,46 @@
+name: Build MHGU LS NRO
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Rust & nightly toolchain
+        uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rust-src
+
+      - name: Install ARM GCC toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi python3
+
+      - name: Install cargo-mhgu-forge
+        run: |
+          cargo install cargo-mhgu-forge --version 1.5.0 --locked
+
+      - name: Build mhw_ls_rebuild.nro
+        env:
+          ARM_GCC: /usr/bin/arm-none-eabi-gcc
+          ML_WORLD_COMBAT: "1"
+          ML_WORLD_INPUT_VM: "1"
+          ML_WORLD_PRESENTATION: "1"
+        run: |
+          rustc -Vv
+          cargo mhgu-forge build --release
+
+      - name: Upload NRO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mhw_ls_rebuild-nro
+          path: 01_plugins/mhw_ls_rebuild/mhw_ls_rebuild.nro
+          
